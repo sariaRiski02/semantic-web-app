@@ -8,12 +8,14 @@ use Illuminate\Support\Facades\Http;
 
 class RDFController extends Controller
 {
+
     public function viewData(Request $request)
     {
-        $endpoint = 'http://localhost:3030/dataset/sparql';
+        $endpoint = env('FUSEKI_ENDPOINT') . '/sparql';
 
         // Ambil input pencarian (opsional)
         $search = trim($request->input('search', ''));
+
 
         // Query dasar
         $query = '
@@ -120,7 +122,7 @@ class RDFController extends Controller
 
         // --- 5️⃣ Kirim RDF ke Apache Jena Fuseki ---
         try {
-            $response = Http::asMultipart()->post('http://localhost:3030/dataset/data', [
+            $response = Http::asMultipart()->post(env('FUSEKI_ENDPOINT') . '/data', [
                 [
                     'name' => 'file',
                     'contents' => file_get_contents($ttlPath),
@@ -141,7 +143,7 @@ class RDFController extends Controller
 
     public function edit($name)
     {
-        $endpoint = 'http://localhost:3030/dataset/sparql';
+        $endpoint = env('FUSEKI_ENDPOINT') . '/sparql';
 
         // Decode agar Todd+Stokes -> Todd Stokes
         $name = urldecode($name);
@@ -185,7 +187,7 @@ class RDFController extends Controller
 
     public function update(Request $request, $name)
     {
-        $endpoint = 'http://localhost:3030/dataset/update';
+        $endpoint = env('FUSEKI_ENDPOINT') . '/update';
 
         $oldName = urldecode($name);
         $escapedName = addslashes($oldName);
@@ -226,7 +228,7 @@ class RDFController extends Controller
 
     public function destroy($name)
     {
-        $endpoint = 'http://localhost:3030/dataset/update';
+        $endpoint = env('FUSEKI_ENDPOINT') . '/update';
         $name = urldecode($name);
         $escaped = addslashes($name);
 

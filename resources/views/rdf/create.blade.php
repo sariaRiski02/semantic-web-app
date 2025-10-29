@@ -24,7 +24,7 @@
 
             <!-- Form Section -->
             <div class="p-8">
-                <!-- Success Message -->
+                <!-- Client-side success placeholder (shown by JS) -->
                 <div class="mb-6 rounded-xl bg-emerald-50 border-l-4 border-emerald-500 p-4 hidden" id="successMsg">
                     <div class="flex items-center">
                         <svg class="h-5 w-5 text-emerald-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -33,6 +33,49 @@
                         <span class="text-emerald-800 font-medium">Data berhasil disimpan!</span>
                     </div>
                 </div>
+
+                {{-- Server-side flash messages --}}
+                @if(session('success'))
+                    <div class="mb-6 rounded-lg bg-emerald-50 border-l-4 border-emerald-500 p-4">
+                        <div class="flex items-start">
+                            <svg class="h-5 w-5 text-emerald-400 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <div class="text-emerald-800 text-sm font-medium">{{ session('success') }}</div>
+                        </div>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="mb-6 rounded-lg bg-red-50 border-l-4 border-red-500 p-4">
+                        <div class="flex items-start">
+                            <svg class="h-5 w-5 text-red-400 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                            <div class="text-red-700 text-sm font-medium">{{ session('error') }}</div>
+                        </div>
+                    </div>
+                @endif
+
+                @if($errors->any())
+                    <div class="mb-6 rounded-lg bg-red-50 border-l-4 border-red-500 p-4">
+                        <div class="flex">
+                            <svg class="h-5 w-5 text-red-400 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <h3 class="text-sm font-medium text-red-800">Terdapat beberapa kesalahan:</h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <ul class="list-disc list-inside">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
 
                 <form action="{{ route('rdf.store') }}" method="POST" class="space-y-6">
                     @csrf
