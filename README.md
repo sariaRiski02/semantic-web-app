@@ -202,6 +202,6 @@ curl -X POST -H "Accept: application/sparql-results+json" -d "query=SELECT * WHE
 
 Penutup
 --
-Terima kasi telah berkunjung
+Terima kasih telah berkunjung
 
 # RDF (Resource Description Framework)
