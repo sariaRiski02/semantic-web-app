@@ -1,61 +1,213 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# semantic-web-app
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Dokumentasi teknis untuk menjalankan aplikasi "semantic-web-app".
 
-## About Laravel
+Ringkasan
+--
+Proyek ini adalah tugas untuk mata kuliah Semantik Web yang dibuat sebagai contoh sederhana untuk menyimpan dan mengambil data mahasiswa dalam format RDF (Turtle) menggunakan Laravel (PHP) dan EasyRdf. Data juga dapat dikirim dan di-query menggunakan Apache Jena Fuseki (SPARQL endpoint).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Isi dokumen ini
+--
+- Prasyarat
+- Menjalankan aplikasi Laravel
+- Memasang dan menyiapkan Apache Jena Fuseki
+- Menulis RDF (Turtle) dengan PHP menggunakan EasyRdf
+- Mengirim (upload) file Turtle ke Fuseki
+- Menjalankan query SPARQL dari aplikasi (JSON results)
+- Troubleshooting dan tips
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Prasyarat
+--
+- PHP 8.x (sesuaikan dengan requirement Laravel di repo)
+- Composer
+- Java (untuk menjalankan Fuseki)
+- Apache Jena Fuseki (server)
+- ekstensi/ package PHP: EasyRdf (sudah terdaftar di composer.json pada repo ini)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Install dependency PHP
+--
+Di root proyek jalankan:
 
-## Learning Laravel
+```powershell
+composer install
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+Konfigurasi environment
+--
+Salin file `.env.example` ke `.env` (jika belum ada) dan atur APP_KEY:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```powershell
+copy .env.example .env
+php artisan key:generate
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Tambahkan konfigurasi Fuseki di `.env`. Penting: `FUSEKI_ENDPOINT` harus berisi base URL untuk dataset Anda (contoh: `http://localhost:3030/dataset` jika dataset bernama `dataset`).
 
-## Laravel Sponsors
+Contoh .env lines:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```
+FUSEKI_ENDPOINT=http://localhost:3030/dataset
+# jika Anda menaruh Fuseki di host/port lain, ubah sesuai
+```
 
-### Premium Partners
+Menjalankan aplikasi Laravel (dev)
+--
+Jalankan server pengembangan Laravel:
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```powershell
+php artisan serve
+```
 
-## Contributing
+Apache Jena Fuseki — instalasi singkat
+--
+1. Download Fuseki (Apache Jena) dari https://jena.apache.org/download/index.cgi — ambil Fuseki server distribution.
+2. Ekstrak ke folder pilihan Anda.
+3. Jalankan Fuseki (Windows / PowerShell):
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```powershell
+# jalankan dari direktori hasil ekstrak, contoh:
+# untuk menjalankan dengan antarmuka admin dan kemampuan update
+.\fuseki-server --update --mem /dataset
+```
 
-## Code of Conduct
+Atau jalankan `fuseki-server` tanpa opsi dan create dataset lewat UI.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+4. Buka admin UI: `http://localhost:3030` → Manage Datasets.
+5. Jika Anda ingin endpoint `http://localhost:3030/dataset`, buat dataset dengan name `dataset` (pilih In-memory atau Persistent sesuai kebutuhan). Setelah dibuat, endpoint SPARQL akan berada di `http://localhost:3030/dataset/sparql` dan endpoint upload di `http://localhost:3030/dataset/data`.
 
-## Security Vulnerabilities
+Upload Turtle (manual) ke Fuseki
+--
+Contoh upload file Turtle (curl):
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```powershell
+curl -X POST "http://localhost:3030/dataset/data" -F "file=@data.ttl;type=text/turtle"
+```
 
-## License
+Jika upload berhasil, Anda akan melihat response sukses (HTTP 200/204). Jika dataset belum ada, endpoint akan gagal (404 atau 4xx).
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Menulis RDF (Turtle) menggunakan PHP + EasyRdf
+--
+EasyRdf memudahkan pembuatan graph, resource, dan serialisasi ke Turtle.
+
+Contoh kode (Laravel controller / plain PHP):
+
+```php
+use EasyRdf\Graph;
+
+$graph = new Graph('http://example.org/');
+// daftarkan prefix agar output lebih rapi
+$graph->setNamespace('ex', 'http://example.org/');
+$graph->setNamespace('foaf', 'http://xmlns.com/foaf/0.1/');
+
+$studentUri = 'http://example.org/student/' . urlencode('Budi_Santoso');
+$student = $graph->resource($studentUri, 'foaf:Person');
+$student->add('foaf:name', 'Budi Santoso');
+$student->add('ex:studentId', '12345678');
+$student->add('ex:studyProgram', 'Teknik Informatika');
+$student->add('ex:university', 'Universitas Contoh');
+
+$ttl = $graph->serialise('turtle');
+file_put_contents(storage_path('app/data.ttl'), $ttl);
+```
+
+Penjelasan singkat:
+- `Graph` membuat objek graph RDF.
+- `resource($uri, $type)` membuat resource/subject dengan tipe RDF (mis. foaf:Person).
+- `add($predicate, $value)` menambahkan triple predicate->value.
+- `serialise('turtle')` menghasilkan representasi Turtle.
+
+Contoh Turtle minimal yang dihasilkan:
+
+```turtle
+@prefix ex: <http://example.org/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+<http://example.org/student/Budi_Santoso> a foaf:Person ;
+	foaf:name "Budi Santoso" ;
+	ex:studentId "12345678" ;
+	ex:studyProgram "Teknik Informatika" ;
+	ex:university "Universitas Contoh" .
+```
+
+Mengirim (upload) Turtle ke Fuseki dari Laravel
+--
+Setelah menghasilkan Turtle (`$ttl` string atau file `data.ttl`), Anda bisa meng-upload ke Fuseki menggunakan HTTP multipart/form-data (field `file`). Contoh dengan Laravel Http client:
+
+```php
+use Illuminate\Support\Facades\Http;
+
+$endpoint = env('FUSEKI_ENDPOINT') . '/data'; // mis: http://localhost:3030/dataset/data
+
+$response = Http::asMultipart()->post($endpoint, [
+	[
+		'name' => 'file',
+		'contents' => $ttl, // atau fopen($path, 'r')
+		'filename' => 'data.ttl',
+	],
+]);
+
+if ($response->failed()) {
+	// log atau kirim pesan error ke UI
+	// dd($response->status(), $response->body());
+}
+```
+
+Atau gunakan curl (dari terminal):
+
+```powershell
+curl -X POST "http://localhost:3030/dataset/data" -F "file=@path\to\data.ttl;type=text/turtle"
+```
+
+Query SPARQL dari aplikasi
+--
+Contoh aplikasi mengirim query ke endpoint SPARQL dan meminta hasil JSON (controller di repo menggunakan Accept: application/sparql-results+json):
+
+```php
+$endpoint = env('FUSEKI_ENDPOINT') . '/sparql';
+$query = "PREFIX foaf: <http://xmlns.com/foaf/0.1/>\nSELECT ?name WHERE { ?s a foaf:Person ; foaf:name ?name } LIMIT 10";
+
+$response = Http::withHeaders(['Accept' => 'application/sparql-results+json'])
+	->asForm()
+	->post($endpoint, ['query' => $query]);
+
+$json = $response->json();
+$bindings = $json['results']['bindings'] ?? [];
+foreach ($bindings as $b) {
+	$name = $b['name']['value'] ?? null;
+}
+```
+
+Hal-hal yang sering bermasalah & troubleshooting
+--
+- Dataset tidak ada: jika Anda mem-post ke `/dataset/data` tapi dataset belum dibuat, Fuseki akan mengembalikan error. Solusi: buat dataset lewat UI atau jalankan `fuseki-server --update --mem /dataset`.
+- Response bukan JSON: jika Accept header tidak diset atau server mengembalikan HTML/error page, `$response->json()` bisa mengembalikan null. Untuk debug sementara gunakan `dd($response->status(), $response->headers(), $response->body())`.
+- Prefix/predicate tidak cocok: pastikan predikat yang Anda query (ex:studentId) sama dengan yang ada di data TTL (namespace dan URI harus cocok). Jika data TTL menggunakan `http://example.org/` lalu gunakan prefix `PREFIX ex: <http://example.org/>` di query dan `ex:studentId` (tanpa tanda &lt;&gt;).
+- File permission: pastikan `storage/` dapat ditulis oleh PHP (Laravel menyimpan sementara `data.ttl` di `storage/app/`).
+
+Tes cepat
+--
+1. Pastikan Fuseki berjalan dan dataset tersedia di `http://localhost:3030/{DATASET}`.
+2. Buat data lewat form `http://127.0.0.1:8000/rdf/create`.
+3. Periksa response dari controller (gunakan logs atau dd sementara) dan cek di Fuseki UI apakah triple bertambah.
+
+Contoh perintah debugging (PowerShell):
+
+```powershell
+# cek dataset yang tersedia
+Invoke-WebRequest -Uri http://localhost:3030/$/datasets | Select-Object -ExpandProperty Content
+
+# kirim query sederhana via curl
+curl -X POST -H "Accept: application/sparql-results+json" -d "query=SELECT * WHERE { ?s ?p ?o } LIMIT 5" http://localhost:3030/dataset/sparql
+```
+
+Penutup
+--
+Dokumentasi ini menyediakan langkah-langkah praktis untuk: menyiapkan Fuseki, membuat RDF Turtle dengan EasyRdf di PHP, meng-upload ke Fuseki, dan menjalankan query SPARQL dari aplikasi Laravel. Jika Anda ingin, saya bisa menambahkan:
+
+- Skrip PowerShell/Batch untuk otomatis membuat dataset Fuseki
+- Contoh unit/integration test untuk controller yang melakukan upload dan query
+- Template `.env.example` yang menunjukkan `FUSEKI_ENDPOINT`
+
+Jika mau saya bisa langsung menambahkan variabel `FUSEKI_ENDPOINT` ke `.env.example` dan memperbarui controller untuk menggunakan `env()` dengan fallback.
+
+# RDF (Resource Description Framework)

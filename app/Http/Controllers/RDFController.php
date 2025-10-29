@@ -57,7 +57,9 @@ class RDFController extends Controller
                 ]);
             }
 
+
             $json = $response->json();
+
             $data = $json['results']['bindings'] ?? [];
 
             $rows = [];
@@ -256,14 +258,14 @@ class RDFController extends Controller
         $response = Http::asForm()->post($endpoint, ['update' => $deleteQuery]);
 
         if ($response->failed()) {
-            dd($response->body()); // lihat error Fuseki kalau gagal
+            // lihat error Fuseki kalau gagal
             return back()->with('error', 'Gagal menghapus data di Fuseki.');
         }
 
         // 🔹 2. Hapus juga dari file data.ttl lokal
         $ttlPath = storage_path('app/data.ttl');
         if (file_exists($ttlPath)) {
-            $graph = new \EasyRdf\Graph();
+            $graph = new Graph();
             $graph->parse(file_get_contents($ttlPath), 'turtle');
 
             foreach ($graph->resources() as $uri => $res) {
