@@ -202,12 +202,6 @@ curl -X POST -H "Accept: application/sparql-results+json" -d "query=SELECT * WHE
 
 Penutup
 --
-Dokumentasi ini menyediakan langkah-langkah praktis untuk: menyiapkan Fuseki, membuat RDF Turtle dengan EasyRdf di PHP, meng-upload ke Fuseki, dan menjalankan query SPARQL dari aplikasi Laravel. Jika Anda ingin, saya bisa menambahkan:
-
-- Skrip PowerShell/Batch untuk otomatis membuat dataset Fuseki
-- Contoh unit/integration test untuk controller yang melakukan upload dan query
-- Template `.env.example` yang menunjukkan `FUSEKI_ENDPOINT`
-
-Jika mau saya bisa langsung menambahkan variabel `FUSEKI_ENDPOINT` ke `.env.example` dan memperbarui controller untuk menggunakan `env()` dengan fallback.
+Terima kasi telah berkunjung
 
 # RDF (Resource Description Framework)
